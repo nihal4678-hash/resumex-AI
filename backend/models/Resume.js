@@ -18,9 +18,14 @@ const resumeSchema = new mongoose.Schema(
     },
 
     publicId: {
-      type: String,
-      required: true,
-    },
+    type: String,
+    required: true,
+  },
+  
+  resumeText: {
+  type: String,
+  default: "",
+},
 
     atsScore: {
       type: Number,

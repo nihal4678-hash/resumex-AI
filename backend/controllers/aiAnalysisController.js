@@ -1,39 +1,40 @@
 const model = require("../services/geminiService");
-const getJobPrompt = require("../utils/jobPrompt");
 
-const compareResume = async (req, res) => {
+const analyzeResume = async (req, res) => {
   try {
-    const { resumeText, jobDescription } = req.body;
+    const { resumeText } = req.body;
 
-    if (!resumeText || !jobDescription) {
+    if (!resumeText) {
       return res.status(400).json({
         success: false,
-        message: "Resume text and Job Description are required",
+        message: "Resume text is required",
       });
     }
 
-    const prompt = getJobPrompt(resumeText, jobDescription);
+    const prompt = `
+You are an ATS Resume Expert.
 
-    let result;
+Analyze this resume.
 
-    // Retry up to 3 times
-    for (let i = 0; i < 3; i++) {
-      try {
-        result = await model.generateContent(prompt);
-        break;
-      } catch (err) {
-        if (err.message.includes("503") && i < 2) {
-          console.log(`Retry ${i + 1}...`);
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-        } else {
-          throw err;
-        }
-      }
-    }
+Return ONLY valid JSON.
+
+{
+  "atsScore": 85,
+  "strengths": [],
+  "weaknesses": [],
+  "missingKeywords": [],
+  "suggestions": []
+}
+
+Resume:
+
+${resumeText}
+`;
+
+    const result = await model.generateContent(prompt);
 
     let text = result.response.text();
 
-    // Remove markdown if Gemini wraps JSON
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
     const analysis = JSON.parse(text);
@@ -44,7 +45,7 @@ const compareResume = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.log(error);
 
     res.status(500).json({
       success: false,
@@ -54,5 +55,5 @@ const compareResume = async (req, res) => {
 };
 
 module.exports = {
-  compareResume,
+  analyzeResume,
 };
