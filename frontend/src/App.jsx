@@ -10,6 +10,9 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Interview from "./pages/Interview";
 import ProtectedRoute from "./components/ProtectedRoute";
+import JobMatch from "./pages/JobMatch";
+import ResumeBuilder from "./pages/ResumeBuilder";
+
 
 function App() {
   return (
@@ -21,7 +24,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
+        <Route path="/upload" element={<UploadResume />} />
+        <Route path="/job-match" element={<JobMatch />} />
         {/* Protected Routes */}
         <Route
           path="/dashboard"
@@ -31,6 +35,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/resume-builder"
+  element={
+    <ProtectedRoute>
+      <ResumeBuilder />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="/upload"
@@ -58,6 +70,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/job-match"
+  element={
+    <ProtectedRoute>
+      <JobMatch />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="/interview"
