@@ -17,23 +17,37 @@ const resumeRoutes = require("./routes/resumeRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const analysisRoutes = require("./routes/analysisRoutes");
 const interviewRoutes = require("./routes/interviewRoutes");
-// Debug (Remove these later)
-console.log("Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
-console.log("API Key:", process.env.CLOUDINARY_API_KEY);
 
 // Connect Database
 connectDB();
 
 const app = express();
 
-// Middleware
+// ============================
+// CORS Configuration
+// ============================
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://resumex-ai-frontend.onrender.com",
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      // Allow requests with no origin (Postman, mobile apps, etc.)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
 
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
