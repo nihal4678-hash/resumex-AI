@@ -100,6 +100,7 @@ const MyResumes = () => {
       setAnalyzing(false);
     }
   };
+  
 
   const downloadPDF = () => {
     if (!analysis) {

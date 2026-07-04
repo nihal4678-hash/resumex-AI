@@ -7,6 +7,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
+
 // Database
 const connectDB = require("./config/db");
 
@@ -17,6 +18,7 @@ const resumeRoutes = require("./routes/resumeRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const analysisRoutes = require("./routes/analysisRoutes");
 const interviewRoutes = require("./routes/interviewRoutes");
+const jobRoutes = require("./routes/jobRoutes");
 
 // Connect Database
 connectDB();
