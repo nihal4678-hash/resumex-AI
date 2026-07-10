@@ -5,11 +5,11 @@ const {
   generateInterviewQuestions,
 } = require("../controllers/interviewController");
 
-const authMiddleware = require("../middleware/authMiddleware");
+const { protect } = require("../middleware/authMiddleware");
 
 router.post(
   "/:resumeId",
-  authMiddleware,
+  protect,
   generateInterviewQuestions
 );
 

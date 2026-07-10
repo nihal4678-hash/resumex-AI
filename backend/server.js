@@ -21,6 +21,8 @@ const interviewRoutes = require("./routes/interviewRoutes");
 const jobRoutes = require("./routes/jobRoutes");
 const resumeBuilderRoutes = require("./routes/resumeBuilderRoutes");
 const skillsRoutes = require("./routes/skillsRoutes");
+const coverLetterRoutes = require("./routes/coverLetterRoutes");
+const jobTrackerRoutes = require("./routes/jobTrackerRoutes");
 
 // Connect Database
 connectDB();
@@ -65,7 +67,9 @@ app.use("/api/analysis", analysisRoutes);
 app.use("/api/interview", interviewRoutes);
 app.use("/api/builder", resumeBuilderRoutes);
 app.use("/api/skills", skillsRoutes);
-
+app.use("/api/cover-letter", coverLetterRoutes);
+app.use("/api/job-tracker", jobTrackerRoutes);
+app.use("/api/jobs", jobRoutes);
 // Test Route
 app.get("/", (req, res) => {
   res.json({

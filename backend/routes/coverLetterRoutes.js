@@ -2,10 +2,12 @@ const express = require("express");
 
 const router = express.Router();
 
-const { compareResume } = require("../controllers/jobController");
-
 const { protect } = require("../middleware/authMiddleware");
 
-router.post("/compare", protect, compareResume);
+const {
+  generateCoverLetter,
+} = require("../controllers/coverLetterController");
+
+router.post("/", protect, generateCoverLetter);
 
 module.exports = router;

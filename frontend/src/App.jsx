@@ -1,32 +1,42 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import Navbar from "./components/layout/Navbar";
+import Loader from "./components/ui/Loader";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Navbar from "./components/Navbar";
+import Dashboard from "./pages/Dashboard";
 import UploadResume from "./pages/UploadResume";
 import MyResumes from "./pages/MyResumes";
-import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Interview from "./pages/Interview";
-import ProtectedRoute from "./components/ProtectedRoute";
 import JobMatch from "./pages/JobMatch";
 import ResumeBuilder from "./pages/ResumeBuilder";
+import CoverLetter from "./pages/CoverLetter";
+import JobTracker from "./pages/JobTracker";
+import AdminDashboard from "./pages/AdminDashboard";
+import ProtectedRoute from "./components/ui/ProtectedRoute";
 
 
 function App() {
   return (
     <BrowserRouter>
+
       <Navbar />
 
       <Routes>
+
         {/* Public Routes */}
+
         <Route path="/" element={<Home />} />
+
         <Route path="/login" element={<Login />} />
+
         <Route path="/register" element={<Register />} />
-        <Route path="/upload" element={<UploadResume />} />
-        <Route path="/job-match" element={<JobMatch />} />
+        
+        <Route path="/admin" element={<AdminDashboard />} />
         {/* Protected Routes */}
+
         <Route
           path="/dashboard"
           element={
@@ -35,15 +45,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-  path="/resume-builder"
-  element={
-    <ProtectedRoute>
-      <ResumeBuilder />
-    </ProtectedRoute>
-  }
-/>
-
+        
         <Route
           path="/upload"
           element={
@@ -70,14 +72,41 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
-  path="/job-match"
-  element={
-    <ProtectedRoute>
-      <JobMatch />
-    </ProtectedRoute>
-  }
-/>
+          path="/job-match"
+          element={
+            <ProtectedRoute>
+              <JobMatch />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/resume-builder"
+          element={
+            <ProtectedRoute>
+              <ResumeBuilder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/job-tracker"
+          element={
+            <ProtectedRoute>
+              <JobTracker />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/cover-letter"
+          element={
+            <ProtectedRoute>
+              <CoverLetter />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/interview"
@@ -87,7 +116,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
       </Routes>
+
     </BrowserRouter>
   );
 }
