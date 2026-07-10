@@ -11,6 +11,8 @@ const Navbar = () => {
     profilePicture: "",
   });
 
+  const isAdmin = localStorage.getItem("role") === "admin";
+
   useEffect(() => {
     loadProfile();
   }, []);
@@ -30,6 +32,9 @@ const Navbar = () => {
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("role");
+
     navigate("/login");
   };
 
@@ -41,7 +46,6 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 shadow-2xl">
-
       <div className="max-w-7xl mx-auto flex items-center justify-between px-8 py-4">
 
         {/* Logo */}
@@ -113,12 +117,16 @@ const Navbar = () => {
             Job Tracker
           </Link>
 
-          <Link
-            to="/admin"
-            className={location.pathname === "/admin" ? active : normal}
-          >
-            Admin
-          </Link>
+          {/* Only Admin Can See */}
+
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className={location.pathname === "/admin" ? active : normal}
+            >
+              Admin
+            </Link>
+          )}
 
         </div>
 
@@ -126,31 +134,24 @@ const Navbar = () => {
 
         <div className="flex items-center gap-4">
 
-          {/* Profile */}
-
           <Link
             to="/profile"
             className="flex items-center gap-3 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full transition"
           >
 
             {user.profilePicture ? (
-
               <img
                 src={user.profilePicture}
                 alt="Profile"
                 className="w-11 h-11 rounded-full object-cover border-2 border-white"
               />
-
             ) : (
-
               <div className="w-11 h-11 rounded-full bg-white text-blue-700 flex items-center justify-center font-bold text-lg">
                 {user.name.charAt(0).toUpperCase()}
               </div>
-
             )}
 
             <div className="hidden md:block">
-
               <p className="text-white font-semibold">
                 {user.name}
               </p>
@@ -158,12 +159,9 @@ const Navbar = () => {
               <p className="text-blue-100 text-sm">
                 View Profile
               </p>
-
             </div>
 
           </Link>
-
-          {/* Logout */}
 
           <button
             onClick={logout}
@@ -175,7 +173,6 @@ const Navbar = () => {
         </div>
 
       </div>
-
     </nav>
   );
 };

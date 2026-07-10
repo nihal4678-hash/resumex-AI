@@ -1,10 +1,11 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Navbar from "./components/layout/Navbar";
-import Loader from "./components/ui/Loader";
+
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+
 import Dashboard from "./pages/Dashboard";
 import UploadResume from "./pages/UploadResume";
 import MyResumes from "./pages/MyResumes";
@@ -15,10 +16,12 @@ import ResumeBuilder from "./pages/ResumeBuilder";
 import CoverLetter from "./pages/CoverLetter";
 import JobTracker from "./pages/JobTracker";
 import AdminDashboard from "./pages/AdminDashboard";
+
 import ProtectedRoute from "./components/ui/ProtectedRoute";
 
-
 function App() {
+  const isAdmin = localStorage.getItem("role") === "admin";
+
   return (
     <BrowserRouter>
 
@@ -26,16 +29,13 @@ function App() {
 
       <Routes>
 
-        {/* Public Routes */}
+        {/* Public */}
 
         <Route path="/" element={<Home />} />
-
         <Route path="/login" element={<Login />} />
-
         <Route path="/register" element={<Register />} />
-        
-        <Route path="/admin" element={<AdminDashboard />} />
-        {/* Protected Routes */}
+
+        {/* Dashboard */}
 
         <Route
           path="/dashboard"
@@ -45,7 +45,9 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
+
+        {/* Upload */}
+
         <Route
           path="/upload"
           element={
@@ -54,6 +56,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* My Resumes */}
 
         <Route
           path="/my-resumes"
@@ -64,14 +68,18 @@ function App() {
           }
         />
 
+        {/* Resume Builder */}
+
         <Route
-          path="/profile"
+          path="/resume-builder"
           element={
             <ProtectedRoute>
-              <Profile />
+              <ResumeBuilder />
             </ProtectedRoute>
           }
         />
+
+        {/* Job Match */}
 
         <Route
           path="/job-match"
@@ -82,22 +90,18 @@ function App() {
           }
         />
 
+        {/* Interview */}
+
         <Route
-          path="/resume-builder"
+          path="/interview"
           element={
             <ProtectedRoute>
-              <ResumeBuilder />
+              <Interview />
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/job-tracker"
-          element={
-            <ProtectedRoute>
-              <JobTracker />
-            </ProtectedRoute>
-          }
-        />
+
+        {/* Cover Letter */}
 
         <Route
           path="/cover-letter"
@@ -108,13 +112,48 @@ function App() {
           }
         />
 
+        {/* Job Tracker */}
+
         <Route
-          path="/interview"
+          path="/job-tracker"
           element={
             <ProtectedRoute>
-              <Interview />
+              <JobTracker />
             </ProtectedRoute>
           }
+        />
+
+        {/* Profile */}
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Only */}
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              {isAdmin ? (
+                <AdminDashboard />
+              ) : (
+                <Navigate to="/dashboard" replace />
+              )}
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Unknown */}
+
+        <Route
+          path="*"
+          element={<Navigate to="/" replace />}
         />
 
       </Routes>
