@@ -60,11 +60,11 @@ function App() {
         {/* My Resumes */}
 
         <Route
-          path="/my-resumes"
-          element={
-            <ProtectedRoute>
-              <MyResumes />
-            </ProtectedRoute>
+         path="/my-resumes"
+         element={
+          <ProtectedRoute>
+          <MyResumes />
+          </ProtectedRoute>
           }
         />
 

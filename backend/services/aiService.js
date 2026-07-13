@@ -1,24 +1,36 @@
-const aiService = async () => {
+const aiService = async (resumeText) => {
+
+  console.log("Resume Length:", resumeText.length);
+
   return {
     atsScore: 82,
+
     strengths: [
-      "Good education section",
-      "Relevant technical skills",
-      "Projects included"
+      "Good Education Section",
+      "Technical Skills Mentioned",
+      "Projects Included",
+      "Professional Layout",
     ],
+
     weaknesses: [
-      "Resume could use more quantified achievements"
+      "Need more quantified achievements",
+      "Experience section can be improved",
     ],
+
     missingKeywords: [
-      "REST API",
+      "Express.js",
       "MongoDB",
-      "Express.js"
+      "REST API",
+      "JWT",
+      "React",
     ],
+
     suggestions: [
-      "Add measurable accomplishments.",
-      "Tailor keywords to the job description.",
-      "Improve project descriptions."
-    ]
+      "Add measurable achievements.",
+      "Improve project descriptions.",
+      "Tailor resume according to job description.",
+      "Include internships if available.",
+    ],
   };
 };
 

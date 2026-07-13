@@ -1,21 +1,25 @@
 const Resume = require("../models/Resume");
 const cloudinary = require("../config/cloudinary");
 
-// Upload Resume
 const uploadResume = async (req, res) => {
   try {
+    console.log("===== Upload Resume =====");
+    console.log(req.file);
+
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: "No file uploaded",
+        message: "No resume uploaded",
       });
     }
 
     const resume = await Resume.create({
-      user: req.user.id,
+      user: req.user._id,
       fileName: req.file.originalname,
       fileUrl: req.file.path,
-      publicId: req.file.filename || req.file.path.split("/").pop(),
+      publicId: req.file.filename,
+      atsScore: 0,
+      resumeText: "",
     });
 
     res.status(201).json({
@@ -24,6 +28,8 @@ const uploadResume = async (req, res) => {
       resume,
     });
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       success: false,
       message: error.message,
@@ -31,18 +37,19 @@ const uploadResume = async (req, res) => {
   }
 };
 
-// Get Logged-in User Resumes
 const getMyResumes = async (req, res) => {
   try {
     const resumes = await Resume.find({
-      user: req.user.id,
+      user: req.user._id,
     }).sort({ createdAt: -1 });
 
-    res.status(200).json({
+    res.json({
       success: true,
       resumes,
     });
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       success: false,
       message: error.message,
@@ -50,7 +57,6 @@ const getMyResumes = async (req, res) => {
   }
 };
 
-// Delete Resume
 const deleteResume = async (req, res) => {
   try {
     const resume = await Resume.findById(req.params.id);
@@ -62,26 +68,26 @@ const deleteResume = async (req, res) => {
       });
     }
 
-    if (resume.user.toString() !== req.user.id) {
+    if (resume.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
-        message: "Not authorized",
+        message: "Not Authorized",
       });
     }
 
-    // Delete from Cloudinary
     await cloudinary.uploader.destroy(resume.publicId, {
       resource_type: "raw",
     });
 
-    // Delete from MongoDB
-    await Resume.findByIdAndDelete(req.params.id);
+    await resume.deleteOne();
 
-    res.status(200).json({
+    res.json({
       success: true,
-      message: "Resume deleted successfully",
+      message: "Resume Deleted Successfully",
     });
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       success: false,
       message: error.message,

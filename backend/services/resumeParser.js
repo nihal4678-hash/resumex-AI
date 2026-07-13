@@ -5,7 +5,7 @@ const extractText = require("../utils/extractText");
 
 const parseResume = async (fileUrl, fileName) => {
   try {
-    // Temporary folder
+
     const tempDir = path.join(__dirname, "../temp");
 
     if (!fs.existsSync(tempDir)) {
@@ -14,7 +14,8 @@ const parseResume = async (fileUrl, fileName) => {
 
     const filePath = path.join(tempDir, fileName);
 
-    // Download file from Cloudinary
+    console.log("Downloading Resume...");
+
     const response = await axios({
       url: fileUrl,
       method: "GET",
@@ -30,16 +31,16 @@ const parseResume = async (fileUrl, fileName) => {
       writer.on("error", reject);
     });
 
-    // Extract text
     const text = await extractText(filePath);
 
-    // Delete temporary file
     fs.unlinkSync(filePath);
 
     return text;
 
   } catch (error) {
+
     console.log(error);
+
     return "";
   }
 };
