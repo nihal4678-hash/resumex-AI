@@ -7,11 +7,8 @@ const crypto = require("crypto");
 // Register User
 // ===============================
 const registerUser = async (req, res) => {
-  console.log("===== REGISTER REQUEST =====");
-  console.log(req.body);
-
   try {
-    const { name, email, password } = req.body;
+    let { name, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -19,6 +16,8 @@ const registerUser = async (req, res) => {
         message: "All fields are required",
       });
     }
+
+    email = email.toLowerCase();
 
     const existingUser = await User.findOne({ email });
 
@@ -41,11 +40,22 @@ const registerUser = async (req, res) => {
       isVerified: true,
     });
 
-    console.log("User Registered Successfully");
+    const token = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
 
     res.status(201).json({
       success: true,
       message: "Registration Successful",
+      token,
       user: {
         id: user._id,
         name: user.name,
@@ -69,8 +79,7 @@ const registerUser = async (req, res) => {
 // ===============================
 const loginUser = async (req, res) => {
   try {
-
-    const { email, password } = req.body;
+    let { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
@@ -78,6 +87,8 @@ const loginUser = async (req, res) => {
         message: "Email and Password are required",
       });
     }
+
+    email = email.toLowerCase();
 
     const user = await User.findOne({ email });
 
@@ -88,16 +99,10 @@ const loginUser = async (req, res) => {
       });
     }
 
-    console.log("Entered Password:", password);
-    console.log("Stored Password:", user.password);
-
     const isMatch = await bcrypt.compare(password, user.password);
 
-    console.log("Password Match:", isMatch);
-
-    // ===== THIS WAS MISSING =====
     if (!isMatch) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "Invalid Password",
       });
@@ -128,14 +133,12 @@ const loginUser = async (req, res) => {
     });
 
   } catch (error) {
-
     console.log(error);
 
     res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
 
@@ -154,7 +157,9 @@ const forgotPassword = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+    });
 
     if (!user) {
       return res.status(404).json({
@@ -181,14 +186,12 @@ const forgotPassword = async (req, res) => {
     });
 
   } catch (error) {
-
     console.log(error);
 
     res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
 
@@ -203,7 +206,9 @@ const resetPassword = async (req, res) => {
 
     const user = await User.findOne({
       resetPasswordToken: token,
-      resetPasswordExpire: { $gt: Date.now() },
+      resetPasswordExpire: {
+        $gt: Date.now(),
+      },
     });
 
     if (!user) {
@@ -227,14 +232,12 @@ const resetPassword = async (req, res) => {
     });
 
   } catch (error) {
-
     console.log(error);
 
     res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
 
