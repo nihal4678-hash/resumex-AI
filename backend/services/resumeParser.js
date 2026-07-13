@@ -5,6 +5,11 @@ const extractText = require("../utils/extractText");
 
 const parseResume = async (fileUrl, fileName) => {
   try {
+    console.log("=================================");
+    console.log("Downloading Resume");
+    console.log(fileUrl);
+    console.log(fileName);
+    console.log("=================================");
 
     const tempDir = path.join(__dirname, "../temp");
 
@@ -12,9 +17,12 @@ const parseResume = async (fileUrl, fileName) => {
       fs.mkdirSync(tempDir);
     }
 
-    const filePath = path.join(tempDir, fileName);
+    const extension = path.extname(fileName);
 
-    console.log("Downloading Resume...");
+    const tempFile = path.join(
+      tempDir,
+      `${Date.now()}${extension}`
+    );
 
     const response = await axios({
       url: fileUrl,
@@ -22,7 +30,7 @@ const parseResume = async (fileUrl, fileName) => {
       responseType: "stream",
     });
 
-    const writer = fs.createWriteStream(filePath);
+    const writer = fs.createWriteStream(tempFile);
 
     response.data.pipe(writer);
 
@@ -31,15 +39,19 @@ const parseResume = async (fileUrl, fileName) => {
       writer.on("error", reject);
     });
 
-    const text = await extractText(filePath);
+    console.log("Downloaded File:", tempFile);
 
-    fs.unlinkSync(filePath);
+    const text = await extractText(tempFile);
+
+    console.log("Extracted Text Length:", text.length);
+
+    fs.unlinkSync(tempFile);
 
     return text;
 
-  } catch (error) {
-
-    console.log(error);
+  } catch (err) {
+    console.log("Resume Parser Error");
+    console.log(err);
 
     return "";
   }

@@ -4,15 +4,26 @@ const mammoth = require("mammoth");
 
 const extractText = async (filePath) => {
   try {
-    // PDF File
-    if (filePath.endsWith(".pdf")) {
+
+    console.log("Reading:", filePath);
+
+    if (filePath.toLowerCase().endsWith(".pdf")) {
+
+      console.log("PDF detected");
+
       const dataBuffer = fs.readFileSync(filePath);
+
       const data = await pdf(dataBuffer);
+
+      console.log("PDF Parsed");
+
       return data.text;
     }
 
-    // DOCX File
-    if (filePath.endsWith(".docx")) {
+    if (filePath.toLowerCase().endsWith(".docx")) {
+
+      console.log("DOCX detected");
+
       const result = await mammoth.extractRawText({
         path: filePath,
       });
@@ -20,9 +31,16 @@ const extractText = async (filePath) => {
       return result.value;
     }
 
+    console.log("Unsupported File");
+
     return "";
-  } catch (error) {
-    console.log(error);
+
+  } catch (err) {
+
+    console.log("Extract Error");
+
+    console.log(err);
+
     return "";
   }
 };
