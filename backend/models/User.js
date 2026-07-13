@@ -2,10 +2,13 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
+    // =====================
     // Basic Info
+    // =====================
     name: {
       type: String,
       required: true,
+      trim: true,
     },
 
     email: {
@@ -13,21 +16,27 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
+      trim: true,
     },
 
     password: {
       type: String,
       required: true,
+      minlength: 6,
     },
 
+    // =====================
     // Role
+    // =====================
     role: {
       type: String,
       enum: ["user", "admin"],
       default: "user",
     },
 
+    // =====================
     // Verification
+    // =====================
     isVerified: {
       type: Boolean,
       default: false,
@@ -38,7 +47,9 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
-    // Password Reset
+    // =====================
+    // Reset Password
+    // =====================
     resetPasswordToken: {
       type: String,
       default: "",
@@ -48,13 +59,14 @@ const userSchema = new mongoose.Schema(
       type: Date,
     },
 
-    // Profile Picture
+    // =====================
+    // Profile
+    // =====================
     profilePicture: {
       type: String,
       default: "",
     },
 
-    // Profile Details
     phone: {
       type: String,
       default: "",
