@@ -5,11 +5,7 @@ const extractText = require("../utils/extractText");
 
 const parseResume = async (fileUrl, fileName) => {
   try {
-    console.log("=================================");
-    console.log("Downloading Resume");
-    console.log(fileUrl);
-    console.log(fileName);
-    console.log("=================================");
+    console.log("Downloading:", fileUrl);
 
     const tempDir = path.join(__dirname, "../temp");
 
@@ -17,39 +13,28 @@ const parseResume = async (fileUrl, fileName) => {
       fs.mkdirSync(tempDir);
     }
 
-    const extension = path.extname(fileName);
-
-    const tempFile = path.join(
-      tempDir,
-      `${Date.now()}${extension}`
-    );
+    const filePath = path.join(tempDir, fileName);
 
     const response = await axios({
       url: fileUrl,
       method: "GET",
-      responseType: "stream",
+      responseType: "arraybuffer",
     });
 
-    const writer = fs.createWriteStream(tempFile);
+    fs.writeFileSync(filePath, response.data);
 
-    response.data.pipe(writer);
+    console.log("Saved File:", filePath);
 
-    await new Promise((resolve, reject) => {
-      writer.on("finish", resolve);
-      writer.on("error", reject);
-    });
-
-    console.log("Downloaded File:", tempFile);
-
-    const text = await extractText(tempFile);
+    const text = await extractText(filePath);
 
     console.log("Extracted Text Length:", text.length);
 
-    fs.unlinkSync(tempFile);
+    fs.unlinkSync(filePath);
 
     return text;
 
   } catch (err) {
+
     console.log("Resume Parser Error");
     console.log(err);
 
