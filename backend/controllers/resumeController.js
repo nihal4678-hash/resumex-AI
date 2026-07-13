@@ -15,7 +15,7 @@ const uploadResume = async (req, res) => {
       user: req.user.id,
       fileName: req.file.originalname,
       fileUrl: req.file.path,
-      publicId: req.file.filename,
+      publicId: req.file.filename || req.file.path.split("/").pop(),
     });
 
     res.status(201).json({

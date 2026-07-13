@@ -38,7 +38,7 @@ const registerUser = async (req, res) => {
       email,
       password: hashedPassword,
       verificationToken,
-      isVerified: true, // Skip email verification during development
+      isVerified: true,
     });
 
     console.log("User Registered Successfully");
@@ -50,6 +50,7 @@ const registerUser = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
 
@@ -68,6 +69,7 @@ const registerUser = async (req, res) => {
 // ===============================
 const loginUser = async (req, res) => {
   try {
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -87,16 +89,25 @@ const loginUser = async (req, res) => {
     }
 
     console.log("Entered Password:", password);
-console.log("Stored Password:", user.password);
+    console.log("Stored Password:", user.password);
 
-const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
 
-console.log("Password Match:", isMatch);
+    console.log("Password Match:", isMatch);
+
+    // ===== THIS WAS MISSING =====
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Password",
+      });
+    }
 
     const token = jwt.sign(
       {
         id: user._id,
         email: user.email,
+        role: user.role,
       },
       process.env.JWT_SECRET,
       {
@@ -117,14 +128,17 @@ console.log("Password Match:", isMatch);
     });
 
   } catch (error) {
+
     console.log(error);
 
     res.status(500).json({
       success: false,
       message: error.message,
     });
+
   }
 };
+
 // ===============================
 // Forgot Password
 // ===============================
@@ -149,16 +163,13 @@ const forgotPassword = async (req, res) => {
       });
     }
 
-    // Generate Reset Token
     const resetToken = crypto.randomBytes(32).toString("hex");
 
     user.resetPasswordToken = resetToken;
-
-    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
 
     await user.save();
 
-    // For now, print token in terminal
     console.log("================================");
     console.log("RESET PASSWORD TOKEN");
     console.log(resetToken);
@@ -180,6 +191,7 @@ const forgotPassword = async (req, res) => {
 
   }
 };
+
 // ===============================
 // Reset Password
 // ===============================
@@ -187,7 +199,6 @@ const resetPassword = async (req, res) => {
   try {
 
     const { token } = req.params;
-
     const { password } = req.body;
 
     const user = await User.findOne({
@@ -205,9 +216,7 @@ const resetPassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     user.password = hashedPassword;
-
     user.resetPasswordToken = undefined;
-
     user.resetPasswordExpire = undefined;
 
     await user.save();

@@ -4,9 +4,12 @@ const cloudinary = require("../config/cloudinary");
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: "ResumeX-AI/ProfilePictures",
-    allowed_formats: ["jpg", "jpeg", "png"],
+  params: async (req, file) => {
+    return {
+      folder: "ResumeX-AI/Resumes",
+      resource_type: "raw",
+      public_id: Date.now() + "-" + file.originalname,
+    };
   },
 });
 
