@@ -7,41 +7,42 @@ const parseResume = async (fileUrl, fileName) => {
   try {
     console.log("Downloading:", fileUrl);
 
-    // Create temp folder
     const tempDir = path.join(__dirname, "../temp");
+
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir);
     }
 
-    // Keep original extension
-    const ext = path.extname(fileName) || ".pdf";
-    const tempFile = path.join(tempDir, `${Date.now()}${ext}`);
+    const filePath = path.join(tempDir, fileName);
 
-    // Download file from Cloudinary
     const response = await axios({
       url: fileUrl,
       method: "GET",
-      responseType: "arraybuffer",
+      responseType: "stream",
     });
 
-    // Save file
-    fs.writeFileSync(tempFile, response.data);
+    const writer = fs.createWriteStream(filePath);
 
-    console.log("Saved:", tempFile);
+    response.data.pipe(writer);
 
-    // Extract text
-    const text = await extractText(tempFile);
+    await new Promise((resolve, reject) => {
+      writer.on("finish", resolve);
+      writer.on("error", reject);
+    });
 
-    console.log("Extracted length:", text.length);
+    console.log("Saved file:", filePath);
 
-    // Delete temp file
-    fs.unlinkSync(tempFile);
+    const text = await extractText(filePath);
+
+    console.log("Extracted text length:", text.length);
+
+    fs.unlinkSync(filePath);
 
     return text;
 
   } catch (error) {
     console.log("Resume Parser Error:");
-    console.log(error.message);
+    console.log(error);
     return "";
   }
 };

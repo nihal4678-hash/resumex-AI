@@ -6,33 +6,37 @@ const extractText = async (filePath) => {
   try {
     console.log("Reading:", filePath);
 
-    // PDF
     if (filePath.toLowerCase().endsWith(".pdf")) {
-      const buffer = fs.readFileSync(filePath);
-      const data = await pdf(buffer);
+      console.log("PDF detected");
 
-      console.log("PDF text length:", data.text.length);
+      const dataBuffer = fs.readFileSync(filePath);
+
+      const data = await pdf(dataBuffer);
+
+      console.log("PDF text:", data.text.length);
 
       return data.text;
     }
 
-    // DOCX
     if (filePath.toLowerCase().endsWith(".docx")) {
+      console.log("DOCX detected");
+
       const result = await mammoth.extractRawText({
         path: filePath,
       });
 
-      console.log("DOCX text length:", result.value.length);
+      console.log("DOCX text:", result.value.length);
 
       return result.value;
     }
 
-    console.log("Unsupported file type");
-    return "";
+    console.log("Unsupported file");
 
+    return "";
   } catch (error) {
     console.log("Extract Error:");
-    console.log(error.message);
+    console.log(error);
+
     return "";
   }
 };
