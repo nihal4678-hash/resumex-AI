@@ -5,7 +5,10 @@ const extractText = require("../utils/extractText");
 
 const parseResume = async (fileUrl, fileName) => {
   try {
-    console.log("Downloading:", fileUrl);
+
+    console.log("========== PARSER ==========");
+    console.log("URL:", fileUrl);
+    console.log("Filename:", fileName);
 
     const tempDir = path.join(__dirname, "../temp");
 
@@ -15,28 +18,38 @@ const parseResume = async (fileUrl, fileName) => {
 
     const filePath = path.join(tempDir, fileName);
 
+    console.log("Saving File To:");
+    console.log(filePath);
+
     const response = await axios({
       url: fileUrl,
       method: "GET",
-      responseType: "arraybuffer",
+      responseType: "stream",
     });
 
-    fs.writeFileSync(filePath, response.data);
+    const writer = fs.createWriteStream(filePath);
 
-    console.log("Saved File:", filePath);
+    response.data.pipe(writer);
+
+    await new Promise((resolve, reject) => {
+      writer.on("finish", resolve);
+      writer.on("error", reject);
+    });
+
+    console.log("Download Completed");
 
     const text = await extractText(filePath);
 
-    console.log("Extracted Text Length:", text.length);
+    console.log("Extracted Characters:", text.length);
 
     fs.unlinkSync(filePath);
 
     return text;
 
-  } catch (err) {
+  } catch (error) {
 
     console.log("Resume Parser Error");
-    console.log(err);
+    console.log(error);
 
     return "";
   }

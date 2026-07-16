@@ -3,28 +3,47 @@ const pdf = require("pdf-parse");
 const mammoth = require("mammoth");
 
 const extractText = async (filePath) => {
+  try {
 
-  console.log("Reading:", filePath);
+    console.log("Reading:", filePath);
 
-  if (filePath.toLowerCase().endsWith(".pdf")) {
+    if (filePath.toLowerCase().endsWith(".pdf")) {
 
-    const buffer = fs.readFileSync(filePath);
+      console.log("PDF Detected");
 
-    const data = await pdf(buffer);
+      const buffer = fs.readFileSync(filePath);
 
-    return data.text;
+      const data = await pdf(buffer);
+
+      console.log("PDF Text Length:", data.text.length);
+
+      return data.text;
+    }
+
+    if (filePath.toLowerCase().endsWith(".docx")) {
+
+      console.log("DOCX Detected");
+
+      const result = await mammoth.extractRawText({
+        path: filePath,
+      });
+
+      console.log("DOCX Text Length:", result.value.length);
+
+      return result.value;
+    }
+
+    console.log("Unsupported File");
+
+    return "";
+
+  } catch (err) {
+
+    console.log("Extract Error");
+    console.log(err);
+
+    return "";
   }
-
-  if (filePath.toLowerCase().endsWith(".docx")) {
-
-    const result = await mammoth.extractRawText({
-      path: filePath,
-    });
-
-    return result.value;
-  }
-
-  return "";
 };
 
 module.exports = extractText;
