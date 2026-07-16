@@ -5,52 +5,43 @@ const extractText = require("../utils/extractText");
 
 const parseResume = async (fileUrl, fileName) => {
   try {
+    console.log("Downloading:", fileUrl);
 
-    console.log("========== PARSER ==========");
-    console.log("URL:", fileUrl);
-    console.log("Filename:", fileName);
-
+    // Create temp folder
     const tempDir = path.join(__dirname, "../temp");
-
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir);
     }
 
-    const filePath = path.join(tempDir, fileName);
+    // Keep original extension
+    const ext = path.extname(fileName) || ".pdf";
+    const tempFile = path.join(tempDir, `${Date.now()}${ext}`);
 
-    console.log("Saving File To:");
-    console.log(filePath);
-
+    // Download file from Cloudinary
     const response = await axios({
       url: fileUrl,
       method: "GET",
-      responseType: "stream",
+      responseType: "arraybuffer",
     });
 
-    const writer = fs.createWriteStream(filePath);
+    // Save file
+    fs.writeFileSync(tempFile, response.data);
 
-    response.data.pipe(writer);
+    console.log("Saved:", tempFile);
 
-    await new Promise((resolve, reject) => {
-      writer.on("finish", resolve);
-      writer.on("error", reject);
-    });
+    // Extract text
+    const text = await extractText(tempFile);
 
-    console.log("Download Completed");
+    console.log("Extracted length:", text.length);
 
-    const text = await extractText(filePath);
-
-    console.log("Extracted Characters:", text.length);
-
-    fs.unlinkSync(filePath);
+    // Delete temp file
+    fs.unlinkSync(tempFile);
 
     return text;
 
   } catch (error) {
-
-    console.log("Resume Parser Error");
-    console.log(error);
-
+    console.log("Resume Parser Error:");
+    console.log(error.message);
     return "";
   }
 };
