@@ -1,50 +1,46 @@
-const axios = require("axios");
 const fs = require("fs");
+const pdf = require("pdf-parse");
+const mammoth = require("mammoth");
 const path = require("path");
-const extractText = require("../utils/extractText");
 
-const parseResume = async (fileUrl, fileName) => {
+const extractText = async (filePath) => {
   try {
-    console.log("Downloading:", fileUrl);
+    const ext = path.extname(filePath).toLowerCase();
 
-    const tempDir = path.join(__dirname, "../temp");
+    console.log("File Path:", filePath);
+    console.log("Extension:", ext);
 
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir);
+    if (ext === ".pdf") {
+      const buffer = fs.readFileSync(filePath);
+
+      console.log("PDF Size:", buffer.length);
+
+      const data = await pdf(buffer);
+
+      console.log("PDF Text Length:", data.text.length);
+
+      return data.text || "";
     }
 
-    const filePath = path.join(tempDir, fileName);
+    if (ext === ".docx") {
+      const result = await mammoth.extractRawText({
+        path: filePath,
+      });
 
-    const response = await axios({
-      url: fileUrl,
-      method: "GET",
-      responseType: "stream",
-    });
+      console.log("DOCX Text Length:", result.value.length);
 
-    const writer = fs.createWriteStream(filePath);
+      return result.value || "";
+    }
 
-    response.data.pipe(writer);
+    console.log("Unsupported File");
 
-    await new Promise((resolve, reject) => {
-      writer.on("finish", resolve);
-      writer.on("error", reject);
-    });
-
-    console.log("Saved file:", filePath);
-
-    const text = await extractText(filePath);
-
-    console.log("Extracted text length:", text.length);
-
-    fs.unlinkSync(filePath);
-
-    return text;
-
+    return "";
   } catch (error) {
-    console.log("Resume Parser Error:");
+    console.log("Extract Error:");
     console.log(error);
+
     return "";
   }
 };
 
-module.exports = parseResume;
+module.exports = extractText;
