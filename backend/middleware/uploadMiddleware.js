@@ -6,29 +6,9 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => ({
     folder: "ResumeX-AI/Resumes",
-    resource_type: "auto",
-    public_id: `${Date.now()}-${file.originalname.split(".")[0]}`,
+    resource_type: "raw",
+    public_id: `${Date.now()}-${file.originalname}`,
   }),
 });
 
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = [
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ];
-
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error("Only PDF, DOC and DOCX files are allowed."));
-  }
-};
-
-module.exports = multer({
-  storage,
-  fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5 MB
-  },
-});
+module.exports = multer({ storage });
