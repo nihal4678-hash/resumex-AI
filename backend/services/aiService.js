@@ -1,69 +1,47 @@
-const model = require("./geminiService");
+const ai = require("./geminiService");
 
 const aiService = async (resumeText) => {
   try {
     const prompt = `
-You are an expert ATS Resume Analyzer.
+You are an ATS Resume Analyzer.
 
-Analyze the following resume.
+Analyze the following resume and return ONLY valid JSON.
 
-Return ONLY valid JSON in this format:
+Return in this exact format:
 
 {
-  "atsScore": 0,
+  "atsScore": 85,
   "strengths": [],
   "weaknesses": [],
   "missingKeywords": [],
   "suggestions": []
 }
 
-Rules:
-- atsScore must be between 0 and 100.
-- strengths: 4-6 points.
-- weaknesses: 3-5 points.
-- missingKeywords: important missing technical keywords.
-- suggestions: practical improvements.
-- Do NOT include markdown.
-- Do NOT wrap the JSON inside \`\`\`.
-
 Resume:
-
 ${resumeText}
 `;
 
-    const result = await model.generateContent(prompt);
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
 
-    let text = result.response.text().trim();
+    let text = response.text;
 
-    // Remove markdown if Gemini returns it
+    // Remove markdown if Gemini wraps JSON in ```json
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
     return JSON.parse(text);
 
   } catch (err) {
-    console.log("AI Service Error:", err);
+    console.error("AI Service Error:", err);
 
     return {
-      atsScore: 75,
-      strengths: [
-        "Education section is present",
-        "Technical skills are included",
-        "Projects are listed"
-      ],
-      weaknesses: [
-        "Need more quantified achievements",
-        "Experience can be improved"
-      ],
-      missingKeywords: [
-        "REST API",
-        "Docker",
-        "MongoDB"
-      ],
-      suggestions: [
-        "Add measurable achievements.",
-        "Tailor the resume for each job.",
-        "Include certifications and internships."
-      ]
+      atsScore: 0,
+      strengths: [],
+      weaknesses: [],
+      missingKeywords: [],
+      suggestions: ["AI analysis failed."],
     };
   }
 };
