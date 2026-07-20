@@ -1,14 +1,40 @@
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("../config/cloudinary");
+const path = require("path");
+const fs = require("fs");
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => ({
-    folder: "ResumeX-AI/Resumes",
-    resource_type: "raw",
-    public_id: `${Date.now()}-${file.originalname}`,
-  }),
+// Create uploads folder if it doesn't exist
+const uploadPath = path.join(__dirname, "../uploads");
+
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadPath);
+  },
+
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + "-" + file.originalname;
+    cb(null, uniqueName);
+  },
 });
 
-module.exports = multer({ storage });
+const upload = multer({
+  storage,
+
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only PDF and DOCX files are allowed."));
+    }
+  },
+});
+
+module.exports = upload;

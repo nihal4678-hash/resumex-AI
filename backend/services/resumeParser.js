@@ -1,46 +1,49 @@
+const axios = require("axios");
 const fs = require("fs");
-const pdf = require("pdf-parse");
-const mammoth = require("mammoth");
 const path = require("path");
+const extractText = require("../utils/extractText");
 
-const extractText = async (filePath) => {
+const parseResume = async (fileUrl, fileName) => {
   try {
-    const ext = path.extname(filePath).toLowerCase();
+    console.log("========== RESUME PARSER ==========");
+    console.log("URL:", fileUrl);
 
-    console.log("File Path:", filePath);
-    console.log("Extension:", ext);
+    const tempDir = path.join(__dirname, "../temp");
 
-    if (ext === ".pdf") {
-      const buffer = fs.readFileSync(filePath);
-
-      console.log("PDF Size:", buffer.length);
-
-      const data = await pdf(buffer);
-
-      console.log("PDF Text Length:", data.text.length);
-
-      return data.text || "";
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir);
     }
 
-    if (ext === ".docx") {
-      const result = await mammoth.extractRawText({
-        path: filePath,
-      });
+    const filePath = path.join(tempDir, fileName);
 
-      console.log("DOCX Text Length:", result.value.length);
+    const response = await axios.get(fileUrl, {
+      responseType: "arraybuffer",
+      validateStatus: () => true,
+    });
 
-      return result.value || "";
+    console.log("Cloudinary Status:", response.status);
+
+    if (response.status !== 200) {
+      console.log("Cloudinary Error:", response.data.toString());
+      return "";
     }
 
-    console.log("Unsupported File");
+    fs.writeFileSync(filePath, response.data);
 
-    return "";
-  } catch (error) {
-    console.log("Extract Error:");
-    console.log(error);
+    console.log("Saved:", filePath);
 
+    const text = await extractText(filePath);
+
+    console.log("Extracted Text Length:", text.length);
+
+    fs.unlinkSync(filePath);
+
+    return text;
+
+  } catch (err) {
+    console.log(err);
     return "";
   }
 };
 
-module.exports = extractText;
+module.exports = parseResume;

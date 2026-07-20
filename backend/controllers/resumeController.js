@@ -1,10 +1,11 @@
 const Resume = require("../models/Resume");
 const cloudinary = require("../config/cloudinary");
+const extractText = require("../utils/extractText");
+const fs = require("fs");
 
 const uploadResume = async (req, res) => {
   try {
     console.log("===== Upload Resume =====");
-    console.log(req.file);
 
     if (!req.file) {
       return res.status(400).json({
@@ -13,20 +14,41 @@ const uploadResume = async (req, res) => {
       });
     }
 
+    console.log("Local File:", req.file.path);
+
+    // Extract text BEFORE uploading to Cloudinary
+    const resumeText = await extractText(req.file.path);
+
+    console.log("Extracted Text Length:", resumeText.length);
+
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "ResumeX-AI/Resumes",
+      resource_type: "raw",
+    });
+
+    console.log("Cloudinary Upload Success");
+    console.log(result.secure_url);
+
+    // Save to MongoDB
     const resume = await Resume.create({
       user: req.user._id,
       fileName: req.file.originalname,
-      fileUrl: req.file.path,
-      publicId: req.file.filename,
+      fileUrl: result.secure_url,
+      publicId: result.public_id,
+      resumeText,
       atsScore: 0,
-      resumeText: "",
     });
+
+    // Delete local file
+    fs.unlinkSync(req.file.path);
 
     res.status(201).json({
       success: true,
       message: "Resume Uploaded Successfully",
       resume,
     });
+
   } catch (error) {
     console.log(error);
 
@@ -47,9 +69,8 @@ const getMyResumes = async (req, res) => {
       success: true,
       resumes,
     });
-  } catch (error) {
-    console.log(error);
 
+  } catch (error) {
     res.status(500).json({
       success: false,
       message: error.message,
@@ -68,13 +89,6 @@ const deleteResume = async (req, res) => {
       });
     }
 
-    if (resume.user.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "Not Authorized",
-      });
-    }
-
     await cloudinary.uploader.destroy(resume.publicId, {
       resource_type: "raw",
     });
@@ -85,9 +99,8 @@ const deleteResume = async (req, res) => {
       success: true,
       message: "Resume Deleted Successfully",
     });
-  } catch (error) {
-    console.log(error);
 
+  } catch (error) {
     res.status(500).json({
       success: false,
       message: error.message,
