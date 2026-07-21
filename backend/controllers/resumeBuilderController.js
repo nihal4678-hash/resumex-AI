@@ -1,4 +1,4 @@
-const model = require("../services/geminiService");
+const ai = require("../services/geminiService");
 
 const generateSummary = async (req, res) => {
   try {
@@ -11,35 +11,25 @@ const generateSummary = async (req, res) => {
     } = req.body;
 
     const prompt = `
-You are an expert resume writer.
-
 Generate a professional resume summary.
 
-Candidate Name:
-${fullName}
+Name: ${fullName}
+Education: ${education}
+Experience: ${experience}
+Skills: ${skills}
+Projects: ${projects}
 
-Education:
-${education}
-
-Experience:
-${experience}
-
-Skills:
-${skills}
-
-Projects:
-${projects}
-
-Return ONLY the professional summary.
+Return only the summary.
 `;
 
-    const result = await model.generateContent(prompt);
-
-    const summary = result.response.text();
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
 
     res.json({
       success: true,
-      summary,
+      summary: response.text,
     });
 
   } catch (error) {
