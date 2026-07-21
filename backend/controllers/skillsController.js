@@ -24,9 +24,12 @@ Example:
 React, Node.js, Express.js, MongoDB, REST API, Git, JavaScript
 `;
 
-    const result = await model.generateContent(prompt);
+    const result = await model.models.generateContent({
+  model: "gemini-2.5-flash",
+  contents: prompt,
+});
 
-    const skills = result.response.text();
+    const skills = result.text;
 
     res.json({
       success: true,

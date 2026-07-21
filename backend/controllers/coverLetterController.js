@@ -37,12 +37,15 @@ ${jobDescription}
 Return only the cover letter.
 `;
 
-    const result = await model.generateContent(prompt);
+    const result = await model.models.generateContent({
+  model: "gemini-2.5-flash",
+  contents: prompt,
+});
 
     res.json({
-      success: true,
-      coverLetter: result.response.text(),
-    });
+  success: true,
+  coverLetter: result.text,
+});
 
   } catch (error) {
     res.status(500).json({

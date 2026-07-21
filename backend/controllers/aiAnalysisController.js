@@ -31,9 +31,12 @@ Resume:
 ${resumeText}
 `;
 
-    const result = await model.generateContent(prompt);
+    const result = await model.models.generateContent({
+  model: "gemini-2.5-flash",
+  contents: prompt,
+});
 
-    let text = result.response.text();
+    let text = result.text;
 
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 

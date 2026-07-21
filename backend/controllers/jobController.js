@@ -18,7 +18,10 @@ const compareResume = async (req, res) => {
 
     for (let i = 0; i < 3; i++) {
       try {
-        result = await model.generateContent(prompt);
+        result = await model.models.generateContent({
+  model: "gemini-2.5-flash",
+  contents: prompt,
+});
         break;
       } catch (err) {
         if (err.message.includes("503") && i < 2) {
@@ -30,7 +33,7 @@ const compareResume = async (req, res) => {
       }
     }
 
-    let text = result.response.text();
+    let text = result.text;
 
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
