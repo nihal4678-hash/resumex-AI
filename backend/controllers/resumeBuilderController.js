@@ -22,15 +22,17 @@ Projects: ${projects}
 Return only the summary.
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
+    const result = await ai.models.generateContent({
+  model: "gemini-2.5-flash",
+  contents: prompt,
+});
 
-    res.json({
-      success: true,
-      summary: response.text,
-    });
+const summary = result.text;
+
+res.json({
+  success: true,
+  summary,
+});
 
   } catch (error) {
     console.error(error);
